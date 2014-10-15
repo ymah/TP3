@@ -9,7 +9,7 @@ CFLAGS 	+= -pedantic
 CFLAGS += -D_XOPEN_SOURCE=500
 CFLAGS += -g
 
-all: palette
+all: palette exec
 .PHONY: clean realclean
 
 
@@ -24,3 +24,6 @@ clean:
 
 realclean: clean
 	$(RM) palette
+
+exec:
+	./palette

@@ -24,3 +24,4 @@ int distanceMin(struct couleur *pal,int pre,int der);
 
 int distanceMinPalette(struct couleur *pal,int k,int pre,int der);
 
+struct couleur *newPalette(struct couleur *pal,int k,int pre,int der);

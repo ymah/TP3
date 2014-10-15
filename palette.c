@@ -7,14 +7,21 @@
 
 
 static int **tab = NULL;
+static int cpt = 0;
+static int **res;            
 static struct interval *tabDist = NULL;
-
 int main()
 {
-  struct couleur *pal;
+  int i;
+  struct couleur *pal,*s;
   pal = malloc(sizeof(struct couleur)*SIZE);
   init_palette(pal);
-  printf("voila : %d\n",distanceMinPalette(pal,3,0,6));  
+  /* for(i=0;i<k;i++) */
+  /*   printf("[%d-%d] -> %d\n",tabDist[i].a,tabDist[i].b,tabDist[i].dist); */
+  /* printf("%d\n",res[0][k]); */
+  s = newPalette(pal,2,0,6);
+  for(i=1;i>=0;i--)
+    printf("%d ",s[i].coul);
   return 0;
 }
 
@@ -69,6 +76,8 @@ int distanceMin(struct couleur *pal,int pre,int der){
   for(i = pre;i<=der;i++){
     tmp = (pal[i].coul - mg);
     dist = dist + (tmp*tmp*pal[i].poids);
+    cpt++;
+
   }
 
   return dist;
@@ -91,7 +100,6 @@ int minimum(int a,int b){
 
 }  
       
-            
 /*k*n2*/
 int distanceMinPalette(struct couleur *pal,int k,int pre,int der){
 
@@ -101,17 +109,18 @@ int distanceMinPalette(struct couleur *pal,int k,int pre,int der){
   if(!tab){
 
     taille = der - pre + 1;
-    tabDist = (struct interval *)calloc(k,sizeof(struct interval*));
     tab = (int **)calloc(taille,sizeof(int *));
-    
+    res = (int **)calloc(taille,sizeof(int *));
+    tabDist = (struct interval *) calloc(k,sizeof(struct interval));
     for(i=0;i< taille;i++){
       tab[i] = (int *)calloc(taille,sizeof(int));
+      res[i] = (int *)calloc(k+1,sizeof(int));
     }
+
     for(i=0;i<taille;i++){
       printf("[%d - %d] ", pal[i].coul,pal[i].poids);
-
     }
-    printf("\n");
+    printf("\n\n");
     for(i=0;i < taille;i++){            
       for(j=i;j < taille;j++){  
         dist = distanceMin(pal,i,j);
@@ -121,22 +130,46 @@ int distanceMinPalette(struct couleur *pal,int k,int pre,int der){
     best = tab[pre][der];
   }   
   
-  if((k==1)){
-    return tab[pre][der];
+  if(k == 1){
+    
+    tabDist[k-1].a = pre;
+    tabDist[k-1].b = der;
+    tabDist[k-1].dist = res[0][k] =tab[pre][der] ;
+
+    return res[0][k];
   }
   else{
     z = pre;
     for(i=z+1;i<der;i++){
+      cpt++;
       dist = tab[z][i];
       min = distanceMinPalette(pal,k-1,i+1,der);       
-      if((min == 0) ||  (min + dist)<best){   
-        best = min+dist;
-        printf("[%d,%d] : \n",z,i);
-        printf("%d + %d = %d\n",dist,min,best);
-        printf("===============\n");
+      if(min == 0 || min+dist < best){
+        tabDist[k-1].a = z;
+        tabDist[k-1].b = i;
+        tabDist[k-1].dist = res[z][k] =best = min+dist;
+            
+        if(!z)  
+          break;
       }
     }
     return best;
   }
 }
     
+
+struct couleur *newPalette(struct couleur *pal,int k,int pre,int der){
+
+  struct couleur *sortie;
+  int i;
+  sortie = (struct couleur *)calloc(k,sizeof(struct couleur));
+  
+  distanceMinPalette(pal,k,pre,der);
+  
+  for(i=k-1;i>=0;i--){
+    sortie[i].poids = 1;
+    sortie[i].coul = meilleurGris(pal,tabDist[i].a,tabDist[i].b);
+    
+  }
+  return sortie;
+}
